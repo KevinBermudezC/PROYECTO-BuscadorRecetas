@@ -1,11 +1,19 @@
 function iniciarApp(){
 
-
     const selectCategorias = document.querySelector('#categorias')
-    selectCategorias.addEventListener('change', seleccionarCategoria)
     const resultado = document.querySelector('#resultado')
+    if(selectCategorias){
+        selectCategorias.addEventListener('change', seleccionarCategoria)
+        obtenerCategorias();
+    }
+    const favoritosDiv = document.querySelector('.favoritos')
+    if(favoritosDiv){
+        obtenerFavoritos();
+    }
+
+
     const modal = new bootstrap.Modal('#modal', {})
-    obtenerCategorias();
+
     function obtenerCategorias(){
         const url = 'https://www.themealdb.com/api/json/v1/1/categories.php';
         fetch(url)
@@ -48,15 +56,15 @@ function iniciarApp(){
 
             const recetaImagen = document.createElement('IMG');
             recetaImagen.classList.add('card-img-top');
-            recetaImagen.alt = `Imagen de la receta ${strMeal}`
-            recetaImagen.src = strMealThumb;
+            recetaImagen.alt = `Imagen de la receta ${strMeal ?? receta.title}`
+            recetaImagen.src = strMealThumb ?? receta.img;
 
             const recetaCardBody = document.createElement('DIV');
             recetaCardBody.classList.add('card-body');
 
             const recetaHeading = document.createElement('H3')
             recetaHeading.classList.add('card-tilte', 'mb-3')
-            recetaHeading.textContent = strMeal;
+            recetaHeading.textContent = strMeal ?? receta.title;
 
             const recetaBtn = document.createElement('button');
             recetaBtn.classList.add('btn', 'btn-danger', 'w-100')
@@ -64,7 +72,7 @@ function iniciarApp(){
             //recetaBtn.dataset.bsTarget = "#modal";
             //recetaBtn.dataset.bsToggle = "modal";
             recetaBtn.onclick = function(){
-                seleccionarReceta(idMeal)
+                seleccionarReceta(idMeal ?? receta.id)
             }
             //inyectar en el html
             recetaCardBody.appendChild(recetaHeading);
@@ -179,6 +187,18 @@ function iniciarApp(){
         const toast = new bootstrap.Toast(toastDiv);
         toastBody.textContent = mensaje;
         toast.show();
+    }
+
+    function obtenerFavoritos(){
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        if(favoritos.length){
+            mostrarRecetas(favoritos)
+            return
+        }
+        const noFavoritos = document.createElement('P')
+        noFavoritos.textContent = 'There is no favorites yet'
+        noFavoritos.classList.add('fs-4','text-center','font-bold','mt-5')
+        favoritosDiv.appendChild(noFavoritos)
     }
 
     function limpiarHTML(selector){
